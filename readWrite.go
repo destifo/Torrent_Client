@@ -95,3 +95,39 @@ func Read(filename string) (torrentStruct Torrent, err error) {
 	return
 }
 
+func ReadToGenerateTorrentFile(fileName string) (torrentFile os.File, torrentStruct Torrent, err error) {
+	name, err := os.Hostname()
+	if err != nil {
+		log.Print("error fetching hostname", err)
+		return
+	}
+
+	ip, err := net.LookupIP(name)
+	// var workingIps []net.IP
+	// // timeout := (20 * time.Second)
+	// for _, currIp := range ip {
+	// 	conn, err := net.Dial("tcp", net.JoinHostPort(currIp.String(), "80"))
+	// 	if err != nil {
+	// 		fmt.Printf("%s: offline\n", currIp.String())
+	// 		continue
+	// 	}
+	// 	workingIps = append(workingIps, currIp)
+	// 	conn.Close()
+	// 	fmt.Printf("%s: online\n", currIp.String())
+	// }
+	if err != nil {
+		log.Panic("error fetching ip")
+	}
+	torrentStruct, err = Read(fileName)
+	if err != nil {
+		log.Panic("error while Reading", err)
+	}
+	torrentStruct.Ip = ip
+
+	_, err = MyMarshall(fileName, torrentStruct)
+	if err != nil {
+		log.Panic("error marshalling", err)
+	}
+
+	return
+}
